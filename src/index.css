@@ -1,0 +1,444 @@
+@import "tailwindcss";
+
+@theme {
+  --color-dc-950: #030712;
+  --color-dc-900: #0a0f1e;
+  --color-dc-800: #0f172a;
+  --color-dc-700: #1e2d4a;
+  --color-dc-600: #1d3461;
+  --color-dc-500: #1e4080;
+  --color-dc-400: #2563eb;
+  --color-dc-300: #38bdf8;
+  --color-dc-200: #7dd3fc;
+  --color-dc-100: #bae6fd;
+  --color-dc-50: #e0f2fe;
+  --color-cyan-glow: #06b6d4;
+  --color-accent: #0ea5e9;
+}
+
+:root {
+  --bg-primary: #030712;
+  --bg-secondary: #0a0f1e;
+  --bg-card: #0f172a;
+  --bg-card-hover: #1e2d4a;
+  --border-color: rgba(56, 189, 248, 0.12);
+  --text-primary: #f0f9ff;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+  --accent-cyan: #06b6d4;
+  --accent-blue: #0ea5e9;
+  --accent-glow: rgba(6, 182, 212, 0.15);
+}
+
+.light {
+  --bg-primary: #f0f9ff;
+  --bg-secondary: #e0f2fe;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0f9ff;
+  --border-color: rgba(14, 165, 233, 0.2);
+  --text-primary: #0c1424;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --accent-cyan: #0284c7;
+  --accent-blue: #0369a1;
+  --accent-glow: rgba(2, 132, 199, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-cyan);
+}
+
+/* Glow effects */
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3), 0 0 60px rgba(6, 182, 212, 0.1);
+}
+
+.glow-blue {
+  box-shadow: 0 0 20px rgba(14, 165, 233, 0.3), 0 0 60px rgba(14, 165, 233, 0.1);
+}
+
+.glow-text-cyan {
+  text-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
+}
+
+/* Glass morphism */
+.glass {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(56, 189, 248, 0.1);
+}
+
+.light .glass {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(14, 165, 233, 0.15);
+}
+
+/* Animated gradient border */
+@keyframes border-glow {
+  0%, 100% { border-color: rgba(6, 182, 212, 0.3); }
+  50% { border-color: rgba(14, 165, 233, 0.7); }
+}
+
+.border-animated {
+  animation: border-glow 3s ease-in-out infinite;
+}
+
+/* Status pulse animations */
+@keyframes pulse-running {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.2); }
+}
+
+@keyframes pulse-building {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-pulse-running {
+  animation: pulse-running 2s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+/* Log terminal styles */
+.log-terminal {
+  background: #020409;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.light .log-terminal {
+  background: #0d1117;
+}
+
+.log-line {
+  display: flex;
+  gap: 8px;
+  padding: 1px 0;
+}
+
+.log-timestamp {
+  color: #374151;
+  flex-shrink: 0;
+}
+
+.light .log-timestamp {
+  color: #9ca3af;
+}
+
+.log-event-endpoint { color: #38bdf8; }
+.log-event-progress { color: #94a3b8; }
+.log-event-complete { color: #4ade80; }
+.log-event-error { color: #f87171; }
+.log-event-build { color: #fb923c; }
+.log-event-app { color: #c084fc; }
+.log-event-default { color: #e2e8f0; }
+
+/* Grid background */
+.grid-bg {
+  background-image: 
+    linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.light .grid-bg {
+  background-image:
+    linear-gradient(rgba(14, 165, 233, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 165, 233, 0.05) 1px, transparent 1px);
+}
+
+/* Gradient backgrounds */
+.bg-radial-cyan {
+  background: radial-gradient(ellipse at top left, rgba(6, 182, 212, 0.08) 0%, transparent 60%);
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(6, 182, 212, 0.1), 0 0 0 1px rgba(6, 182, 212, 0.2);
+  border-color: rgba(6, 182, 212, 0.3) !important;
+}
+
+/* Button animations */
+.btn-primary {
+  background: linear-gradient(135deg, #06b6d4, #0ea5e9);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.btn-primary:hover::before {
+  opacity: 1;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* Typing cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.cursor-blink::after {
+  content: '█';
+  animation: blink 1s step-start infinite;
+  color: var(--accent-cyan);
+}
+
+/* Slide in animations */
+@keyframes slideInFromLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInFromRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInFromBottom {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-slide-left { animation: slideInFromLeft 0.4s ease forwards; }
+.animate-slide-right { animation: slideInFromRight 0.4s ease forwards; }
+.animate-slide-up { animation: slideInFromBottom 0.4s ease forwards; }
+.animate-fade-in { animation: fadeIn 0.3s ease forwards; }
+.animate-scale-in { animation: scaleIn 0.3s ease forwards; }
+
+/* Stagger children */
+.stagger-children > * {
+  animation: slideInFromBottom 0.4s ease forwards;
+  opacity: 0;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+
+/* Neon border on focus */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.3), 0 0 15px rgba(6, 182, 212, 0.1);
+}
+
+/* Progress bar animation */
+@keyframes progress-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.progress-shimmer {
+  background: linear-gradient(90deg, #06b6d4 0%, #38bdf8 40%, #06b6d4 60%, #0ea5e9 100%);
+  background-size: 200% 100%;
+  animation: progress-shimmer 2s linear infinite;
+}
+
+/* Container status indicators */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  background: rgba(3, 7, 18, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+.light .modal-backdrop {
+  background: rgba(240, 249, 255, 0.8);
+}
+
+/* Tooltip */
+.tooltip {
+  position: relative;
+}
+.tooltip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 50;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+.tooltip:hover::after {
+  opacity: 1;
+}
+
+/* DC Logo animation */
+@keyframes logoGlow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(6, 182, 212, 0.6)); }
+  50% { filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.9)) drop-shadow(0 0 24px rgba(6, 182, 212, 0.4)); }
+}
+
+.logo-glow {
+  animation: logoGlow 3s ease-in-out infinite;
+}
+
+/* Active nav item */
+.nav-active {
+  background: rgba(6, 182, 212, 0.12);
+  border-left: 3px solid #06b6d4;
+  color: #06b6d4;
+}
+
+.nav-item {
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.nav-item:hover {
+  background: rgba(6, 182, 212, 0.06);
+  border-left-color: rgba(6, 182, 212, 0.4);
+  color: #38bdf8;
+}
+
+/* Badge */
+.badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+/* Floating particles */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
+  33% { transform: translateY(-15px) rotate(120deg); opacity: 0.8; }
+  66% { transform: translateY(8px) rotate(240deg); opacity: 0.5; }
+}
+
+.particle {
+  animation: float 8s ease-in-out infinite;
+}
+
+/* Copy button flash */
+@keyframes copy-flash {
+  0% { background-color: rgba(6, 182, 212, 0); }
+  30% { background-color: rgba(6, 182, 212, 0.2); }
+  100% { background-color: rgba(6, 182, 212, 0); }
+}
+
+.copy-flash {
+  animation: copy-flash 0.5s ease;
+}
+
+/* Notification slide in */
+@keyframes notif-enter {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes notif-exit {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(100%); }
+}
+
+.notif-enter { animation: notif-enter 0.3s ease forwards; }
+.notif-exit { animation: notif-exit 0.3s ease forwards; }
+
+/* Health status colors */
+.health-pass { color: #4ade80; }
+.health-fail { color: #f87171; }
+
+/* Deploy pipeline step */
+.pipeline-step {
+  position: relative;
+}
+.pipeline-step::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 24px;
+  bottom: -8px;
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(6, 182, 212, 0.4), rgba(6, 182, 212, 0));
+}
+.pipeline-step:last-child::before {
+  display: none;
+}
