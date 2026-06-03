@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useState} from 'react';
+import { useEffect, useMemo, } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import Sidebar from './components/layout/Sidebar';
@@ -15,31 +15,6 @@ import AppDetails from './pages/AppDetails';
 
 
 // Background particle component
-type LifeState = 'enter' | 'idle' | 'exit';
-
-function createParticle() {
-  return {
-    id: Math.random().toString(36),
-
-    size: Math.random() * 280 + 120,
-
-    left: `${Math.random() * 100}%`,
-    top: `${Math.random() * 100}%`,
-
-    color: Math.random() > 0.5 ? '#06b6d4' : '#0ea5e9',
-
-    duration: 8 + Math.random() * 10,
-
-    opacity: 0.03 + Math.random() * 0.06,
-
-    rotate: Math.random() * 360,
-
-    // ✅ FIX: subtle variation only (NOT chaotic blob shapes)
-    borderRadius: '50%',
-
-    state: 'enter' as LifeState,
-  };
-}
 
 function Particles() {
   const particles = useMemo(() => {
