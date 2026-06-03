@@ -133,10 +133,16 @@ export default function CreateAppModal({ open, onClose }: CreateAppModalProps) {
                   <span className="flex items-center gap-1.5"><Server size={12} />Container Port</span>
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={form.container_port}
-                  onChange={(e) => setForm(f => ({ ...f, container_port: parseInt(e.target.value) || 8080 }))}
-                  min={1} max={65535}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      container_port: e.target.value === '' ? 0 : parseInt(e.target.value, 10) || 0,
+                    }))
+                  }
                   className={`w-full bg-[var(--bg-primary)] border rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] transition-all
                     ${errors.container_port ? 'border-red-500/50' : 'border-[var(--border-color)] focus:border-cyan-500/50'}`}
                 />
@@ -147,10 +153,16 @@ export default function CreateAppModal({ open, onClose }: CreateAppModalProps) {
                   <span className="flex items-center gap-1.5"><Server size={12} />Host Port <span className="text-[var(--text-muted)]">(0 = auto)</span></span>
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={form.host_port}
-                  onChange={(e) => setForm(f => ({ ...f, host_port: parseInt(e.target.value) || 0 }))}
-                  min={0} max={65535}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      host_port: e.target.value === '' ? 0 : parseInt(e.target.value, 10) || 0,
+                    }))
+                  }
                   className="w-full bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] transition-all focus:border-cyan-500/50"
                 />
               </div>
@@ -217,7 +229,7 @@ export default function CreateAppModal({ open, onClose }: CreateAppModalProps) {
               logs={op?.logs ?? []}
               status={op?.status === 'running' ? 'running' : op?.status === 'complete' ? 'complete' : op?.status === 'error' ? 'error' : 'idle'}
               title={`create:${form.name}`}
-              height="h-72"
+              height="h-80"
             />
           </div>
         )}

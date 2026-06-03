@@ -69,8 +69,7 @@ export default function LogTerminal({
   };
 
   return (
-    <div className={`flex flex-col rounded-xl border border-[var(--border-color)] overflow-hidden ${height === 'full' ? 'h-full' : ''}`}>
-      {/* Terminal header */}
+    <div className="relative flex flex-col rounded-xl border border-[var(--border-color)] overflow-hidden h-[600px] max-h-[80vh]">      {/* Terminal header */}
       <div className="flex items-center justify-between px-4 py-2 bg-[var(--bg-secondary)] border-b border-[var(--border-color)]">
         <div className="flex items-center gap-2">
           {/* macOS-style dots */}
@@ -124,8 +123,7 @@ export default function LogTerminal({
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className={`log-terminal flex-1 overflow-y-auto p-4 ${height !== 'full' ? height : 'flex-1'}`}
-      >
+        className={`log-terminal flex-1 overflow-y-auto p-4 ${height !== 'full' ? height : 'flex-1'}`} >
         {logs.length === 0 ? (
           <div className="flex items-center justify-center h-full text-[var(--text-muted)] text-xs font-mono">
             <span>Waiting for output</span>

@@ -34,7 +34,7 @@ export default function Containers() {
   const [starting, setStarting] = useState(false);
 
   // NEW: make filtering safe even when a container is missing Id/Names/Image
-  const filtered = containers.filter((c, i) => {
+  const filtered = containers.filter((c) => {
     const q = search.toLowerCase();
 
     const id = typeof c?.Id === 'string' ? c.Id : '';
