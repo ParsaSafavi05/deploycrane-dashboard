@@ -1,14 +1,11 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Settings, Server, RefreshCw, Sun, Moon, Check, RotateCcw,
-  Globe, Clock, Sliders, Info, ExternalLink
+  Settings, Server, RefreshCw, Sun, Moon,
+  Clock, Sliders, Info, ExternalLink
 } from 'lucide-react';
 import Header from '../components/layout/Header';
-import Button from '../components/ui/Button';
 import { useSettingsStore, useThemeStore } from '../store';
-import { saveBaseUrl, resetBaseUrl } from '../config/api';
-import { useApps } from '../hooks/useApps';
+import { getCurrentBaseUrl } from '../config/api';
 
 function SettingSection({ title, icon: Icon, children }: {
   title: string;
@@ -47,42 +44,10 @@ function SettingRow({ label, description, children }: {
 }
 
 export default function SettingsPage() {
-  const { apiBaseUrl, setApiBaseUrl, autoRefresh, setAutoRefresh, refreshInterval, setRefreshInterval } = useSettingsStore();
+  const { autoRefresh, setAutoRefresh, refreshInterval, setRefreshInterval } = useSettingsStore();
   const { theme, setTheme } = useThemeStore();
-  const { load } = useApps();
 
-  const [url, setUrl] = useState(apiBaseUrl);
-  const [saved, setSaved] = useState(false);
-  const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<'pass' | 'fail' | null>(null);
-
-  const handleSaveUrl = () => {
-    saveBaseUrl(url.trim());
-    setApiBaseUrl(url.trim());
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-    load();
-  };
-
-  const handleReset = () => {
-    resetBaseUrl();
-    const def = 'http://localhost:8080';
-    setUrl(def);
-    setApiBaseUrl(def);
-  };
-
-  const handleTest = async () => {
-    setTesting(true);
-    setTestResult(null);
-    try {
-      const res = await fetch(`${url.trim()}/health`, { signal: AbortSignal.timeout(5000) });
-      setTestResult(res.ok ? 'pass' : 'fail');
-    } catch {
-      setTestResult('fail');
-    } finally {
-      setTesting(false);
-    }
-  };
+  const apiBaseUrl = getCurrentBaseUrl();
 
   const REFRESH_OPTIONS = [5, 10, 15, 30, 60];
 
@@ -94,69 +59,21 @@ export default function SettingsPage() {
       />
 
       <div className="p-6 space-y-5 max-w-2xl mx-auto">
-        {/* API Configuration */}
+        {/* API Configuration (Read-Only) */}
         <SettingSection title="API Configuration" icon={Server}>
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">
-                API Base URL
-              </label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
-                  <input
-                    value={url}
-                    onChange={e => setUrl(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSaveUrl()}
-                    placeholder="http://localhost:8080"
-                    className="w-full bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl pl-9 pr-4 py-2.5 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-cyan-500/50 transition-all font-mono"
-                  />
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  icon={<RotateCcw size={13} />}
-                  onClick={handleReset}
-                  title="Reset to default"
-                />
-              </div>
-              <p className="text-xs text-[var(--text-muted)] mt-1.5 flex items-center gap-1">
-                <Info size={10} />
-                Can also be set via <code className="font-mono bg-[var(--bg-secondary)] px-1 rounded">VITE_API_BASE_URL</code> env variable
-              </p>
-            </div>
+          <SettingRow
+            label="API Base URL"
+            description="Read-only. Set VITE_API_BASE_URL and rebuild to change."
+          >
+            <code className="px-3 py-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-xs font-mono text-[var(--text-secondary)] break-all">
+              {apiBaseUrl}
+            </code>
+          </SettingRow>
 
-            <div className="flex items-center gap-2">
-              <Button
-                variant="primary"
-                size="sm"
-                icon={saved ? <Check size={13} /> : undefined}
-                onClick={handleSaveUrl}
-              >
-                {saved ? 'Saved!' : 'Save URL'}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                loading={testing}
-                onClick={handleTest}
-              >
-                Test Connection
-              </Button>
-              {testResult && (
-                <motion.span
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className={`text-sm font-medium flex items-center gap-1.5 ${
-                    testResult === 'pass' ? 'text-emerald-400' : 'text-red-400'
-                  }`}
-                >
-                  {testResult === 'pass' ? <Check size={14} /> : '✕'}
-                  {testResult === 'pass' ? 'Connected!' : 'Connection failed'}
-                </motion.span>
-              )}
-            </div>
-          </div>
+          <p className="text-xs text-[var(--text-muted)] flex items-center gap-1">
+            <Info size={10} />
+            Configured via <code className="font-mono bg-[var(--bg-secondary)] px-1 rounded">VITE_API_BASE_URL</code>
+          </p>
 
           {/* API Endpoints Reference */}
           <div className="mt-4 p-4 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)]">
@@ -283,7 +200,7 @@ export default function SettingsPage() {
               </a>
             </div>
             <p className="text-xs text-[var(--text-muted)] leading-relaxed pt-2">
-              A production-grade dashboard for DeployCrane — a lightweight Go-based PaaS that 
+              A production-grade dashboard for DeployCrane — a lightweight Go-based PaaS that
               dockerizes and deploys applications from Git repositories.
             </p>
           </div>

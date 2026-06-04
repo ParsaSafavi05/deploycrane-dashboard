@@ -214,10 +214,8 @@ export const useUIStore = create<UIState>()((set) => ({
 
 // ─── Settings Store ───────────────────────────────────────────────────────────
 interface SettingsState {
-  apiBaseUrl: string;
   autoRefresh: boolean;
   refreshInterval: number; // seconds
-  setApiBaseUrl: (url: string) => void;
   setAutoRefresh: (v: boolean) => void;
   setRefreshInterval: (s: number) => void;
 }
@@ -230,7 +228,6 @@ export const useSettingsStore = create<SettingsState>()(
       apiBaseUrl: getCurrentBaseUrl(), // ← reads localStorage then falls back to dynamic default
       autoRefresh: true,
       refreshInterval: 10,
-      setApiBaseUrl: (apiBaseUrl) => set({ apiBaseUrl }),
       setAutoRefresh: (autoRefresh) => set({ autoRefresh }),
       setRefreshInterval: (refreshInterval) => set({ refreshInterval }),
     }),

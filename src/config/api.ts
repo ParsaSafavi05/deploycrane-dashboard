@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────
-// DeployCrane API Configuration
-// ─────────────────────────────────────────────────────────────────
-
 export interface ApiConfig {
   baseUrl: string;
   timeout: number;
@@ -23,52 +19,30 @@ export interface ApiConfig {
   };
 }
 
-// ─── Resolve the default base URL ────────────────────────────────
-/**
- * Priority:
- *  1. VITE_API_BASE_URL build-time env var  (set in .env.local or CI)
- *  2. Dynamic same-host resolution          (works for any IP/domain)
- *  3. localhost:8080 fallback               (file:// or SSR)
- *
- * How dynamic resolution works:
- *  - Dev   (port 5173/4173) → same hostname but port 8080
- *  - Prod  (Go serves UI and API on same port e.g. 8080) → same origin
- */
-function resolveDefaultBaseUrl(): string {
-  // 1. Build-time override always wins
-  const envUrl = (import.meta as any).env?.VITE_API_BASE_URL as string | undefined;
-  if (envUrl) return envUrl;
-
-  // 2. No window (SSR/test) or file:// → localhost fallback
+function resolveBaseUrl(): string {
   if (typeof window === 'undefined' || window.location.protocol === 'file:') {
     return 'http://localhost:8080';
   }
 
-  const { protocol, hostname, port } = window.location;
+  const { protocol, hostname, port, origin } = window.location;
 
-  // Dev server ports → backend is always on 8080
+  // Vite dev / preview
   if (port === '5173' || port === '4173') {
     return `${protocol}//${hostname}:8080`;
   }
 
-  // Production: Go serves both UI and API on the same port
-  // so we use the exact same origin the browser used to load the page
-  return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
+  // Production behind nginx
+  return `${origin}/api`;
 }
 
-const DEFAULT_BASE_URL: string = resolveDefaultBaseUrl();
-
-// ─── Config builder ───────────────────────────────────────────────
 function buildConfig(baseUrl: string): ApiConfig {
-  const base = baseUrl.replace(/\/$/, ''); // strip trailing slash
+  const base = baseUrl.replace(/\/$/, '');
+
   return {
     baseUrl: base,
     timeout: 30000,
     endpoints: {
-      // ── Health ──────────────────────────────────────────────
       health: `${base}/health`,
-
-      // ── Apps ────────────────────────────────────────────────
       apps: `${base}/apps`,
       app: (id) => `${base}/apps/${id}`,
       createApp: `${base}/apps`,
@@ -78,8 +52,6 @@ function buildConfig(baseUrl: string): ApiConfig {
       stopApp: (id) => `${base}/apps/${id}/stop`,
       deployApp: (id) => `${base}/apps/${id}/deploy`,
       deleteApp: (id) => `${base}/apps/${id}`,
-
-      // ── Containers ──────────────────────────────────────────
       containers: `${base}/containers`,
       container: (id) => `${base}/containers/${id}`,
       startContainer: `${base}/containers/start`,
@@ -88,44 +60,12 @@ function buildConfig(baseUrl: string): ApiConfig {
   };
 }
 
-// ─── localStorage persistence ─────────────────────────────────────
-// Users can override the URL from the Settings panel without rebuild.
-// The stored value takes priority over the dynamic default at runtime.
-const STORAGE_KEY = 'deploycrane_api_base_url';
-
-function getStoredBaseUrl(): string {
-  try {
-    return localStorage.getItem(STORAGE_KEY) || DEFAULT_BASE_URL;
-  } catch {
-    return DEFAULT_BASE_URL;
-  }
-}
-
-export function saveBaseUrl(url: string): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, url);
-  } catch {
-    // ignore — private browsing mode etc.
-  }
-}
-
-export function resetBaseUrl(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // ignore
-  }
-}
+export const apiConfig = buildConfig(resolveBaseUrl());
 
 export function getApiConfig(): ApiConfig {
-  return buildConfig(getStoredBaseUrl());
+  return apiConfig;
 }
 
 export function getCurrentBaseUrl(): string {
-  return getStoredBaseUrl();
+  return apiConfig.baseUrl;
 }
-
-// ─── Static singleton (used at module load time) ──────────────────
-// Services that import apiConfig directly get the value at startup.
-// For dynamic updates use getApiConfig() which re-reads localStorage.
-export const apiConfig = buildConfig(getStoredBaseUrl());

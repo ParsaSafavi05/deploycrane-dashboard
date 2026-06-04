@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import * as api from '../services/api';
-import { useAppsStore, useOperationsStore, useNotificationStore, useSettingsStore } from '../store';
-import { saveBaseUrl } from '../config/api';
+import { useAppsStore, useOperationsStore, useNotificationStore } from '../store';
 import type { CreateAppInput, OperationType, SSELogLine } from '../types';
 
 export function useApps() {
@@ -159,14 +158,5 @@ export function useApps() {
     [notify, removeApp]
   );
 
-  const updateBaseUrl = useCallback(
-    (url: string) => {
-      saveBaseUrl(url);
-      useSettingsStore.getState().setApiBaseUrl(url);
-      load();
-    },
-    [load]
-  );
-
-  return { apps, loading, error, load, create, clone, build, start, deploy, stop, remove, updateBaseUrl };
+  return { apps, loading, error, load, create, clone, build, start, deploy, stop, remove };
 }
