@@ -33,7 +33,7 @@ function pipelineProgress(status: string): number {
   return map[status] ?? 0;
 }
 
-export default function AppCard({ app, onSelect }: AppCardProps) {
+export default function AppCard({ app }: AppCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const { clone, build, start, deploy, stop, remove } = useApps();
