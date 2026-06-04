@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import Sidebar from './components/layout/Sidebar';
@@ -16,11 +16,29 @@ import { useApps } from './hooks/useApps';
 import { useContainers } from './hooks/useContainers';
 import { useSettingsStore } from './store';
 
+// Add this hook at the top of your file
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile(); // Check on mount
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  return isMobile;
+}
+
 // ─── Background particles ────────────────────────────────────────────────────
 
 function Particles() {
+  const isMobile = useIsMobile();
+  
   const particles = useMemo(() => {
-    return [...Array(6)].map((_, i) => ({
+    // Render only 2 particles on mobile, 6 on desktop
+    const count = isMobile ? 2 : 6; 
+    return [...Array(count)].map((_, i) => ({
       id: i,
       size: Math.random() * 400 + 200,
       left: Math.random() * 100,
@@ -29,7 +47,7 @@ function Particles() {
       animationDelay: i * 1.5,
       animationDuration: 8 + i * 2,
     }));
-  }, []);
+  }, [isMobile]); // Re-calculate when device type changes
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -45,6 +63,7 @@ function Particles() {
             background: `radial-gradient(circle, ${p.color}, transparent)`,
             animationDelay: `${p.animationDelay}s`,
             animationDuration: `${p.animationDuration}s`,
+            willChange: 'transform', // Forces GPU acceleration
           }}
         />
       ))}
@@ -53,6 +72,8 @@ function Particles() {
 }
 
 function AmbientBubbles() {
+  const isMobile = useIsMobile();
+
   const bubbles = useMemo(() => {
     const palette = [
       ['rgba(6,182,212,0.55)', 'rgba(6,182,212,0.14)'],
@@ -61,7 +82,10 @@ function AmbientBubbles() {
       ['rgba(168,85,247,0.45)', 'rgba(168,85,247,0.10)'],
     ];
 
-    return Array.from({ length: 10 }).map((_, index) => {
+    // Render only 3 bubbles on mobile, 10 on desktop
+    const count = isMobile ? 3 : 10;
+
+    return Array.from({ length: count }).map((_, index) => {
       const depth = Math.pow(Math.random(), 1.7);
       const [a, b] = palette[Math.floor(Math.random() * palette.length)];
 
@@ -71,12 +95,13 @@ function AmbientBubbles() {
         left: `${Math.random() * 100}%`,
         top: `${Math.random() * 100}%`,
         opacity: 0.12 + (1 - depth) * 0.25,
-        blur: 18 + depth * 30,
+        // Disable expensive blur entirely on mobile
+        blur: isMobile ? 0 : 18 + depth * 30, 
         duration: 18 + Math.random() * 18,
         bg: `radial-gradient(circle at 30% 30%, ${a}, ${b} 45%, transparent 80%)`,
       };
     });
-  }, []);
+  }, [isMobile]); // Re-calculate when device type changes
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -90,9 +115,10 @@ function AmbientBubbles() {
             left: b.left,
             top: b.top,
             opacity: b.opacity,
-            filter: `blur(${b.blur}px)`,
+            filter: b.blur > 0 ? `blur(${b.blur}px)` : 'none', // Apply conditionally
             background: b.bg,
             animation: `ambientDrift ${b.duration}s ease-in-out infinite`,
+            willChange: 'transform', // Forces GPU acceleration
           }}
         />
       ))}
@@ -126,7 +152,7 @@ function AppLayout() {
 
   return (
     <div className="flex h-screen bg-[var(--bg-primary)] grid-bg bg-radial-cyan overflow-hidden">
-      {/* <AmbientBubbles /> */}
+      <AmbientBubbles />
       <Particles />
 
       {/* Sidebar handles its own mobile/desktop rendering */}
