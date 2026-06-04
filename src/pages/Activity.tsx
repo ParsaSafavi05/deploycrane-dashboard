@@ -35,7 +35,7 @@ function OperationCard({ op }: { op: ActiveOperation }) {
       )}
 
       <div className="p-5">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className={`p-2.5 rounded-xl border ${
               op.status === 'running' ? 'bg-cyan-500/10 border-cyan-500/30' :
@@ -79,7 +79,7 @@ function OperationCard({ op }: { op: ActiveOperation }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-end sm:self-auto">
             <button
               onClick={() => setShowLogs(s => !s)}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-card-hover)] transition-colors border border-transparent hover:border-[var(--border-color)]"

@@ -86,7 +86,7 @@ export default function Dashboard() {
             className="relative overflow-hidden rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-cyan-950/40 via-slate-900 to-slate-900 p-8"
           >
             <div className="absolute inset-0 bg-radial-cyan opacity-50" />
-            <div className="relative flex items-center gap-6">
+            <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
               <div className="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20">
                 <Rocket size={32} className="text-cyan-400" />
               </div>
@@ -98,7 +98,7 @@ export default function Dashboard() {
               </div>
               <Link
                 to="/apps"
-                className="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-sky-500 text-white text-sm font-semibold hover:from-cyan-400 hover:to-sky-400 transition-all shadow-lg shadow-cyan-500/25"
+                className="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-sky-500 text-white text-sm font-semibold hover:from-cyan-400 hover:to-sky-400 transition-all shadow-lg shadow-cyan-500/25 w-full sm:w-auto justify-center sm:justify-star"
               >
                 <Box size={16} />
                 Deploy First App
@@ -108,7 +108,7 @@ export default function Dashboard() {
         )}
 
         {/* Stat cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             label="Total Apps"
             value={apps.length}
@@ -169,7 +169,7 @@ export default function Dashboard() {
           </motion.div>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent Apps */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}

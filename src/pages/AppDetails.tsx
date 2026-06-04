@@ -89,7 +89,7 @@ export default function AppDetails() {
 
       <div className="p-6 space-y-6 max-w-5xl mx-auto">
         {/* Toolbar */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <Button
             variant="ghost"
             size="sm"
@@ -184,9 +184,9 @@ export default function AppDetails() {
         </motion.div>
 
         {/* Deployment Pipeline */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5">
-          <h3 className="text-sm font-medium text-[var(--text-secondary)] mb-4">Deployment Progress</h3>
-          <div className="flex items-center gap-0">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5">
+        <h3 className="text-sm font-medium text-[var(--text-secondary)] mb-4">Deployment Progress</h3>
+        <div className="flex items-center gap-0 overflow-x-auto pb-2 scrollbar-none">
             {PIPELINE_STEPS.map((step, i) => {
               const active = progress === i;
               const complete = progress > i;
@@ -263,7 +263,7 @@ export default function AppDetails() {
                 Delete App
               </Button>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs text-red-400">Confirm delete?</span>
                 <Button variant="danger" size="sm" onClick={() => remove(app.id)}>Yes</Button>
                 <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)}>No</Button>

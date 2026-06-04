@@ -1,4 +1,4 @@
-import { useEffect, useMemo, } from 'react';
+import { useEffect, useMemo } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import Sidebar from './components/layout/Sidebar';
@@ -16,7 +16,7 @@ import { useApps } from './hooks/useApps';
 import { useContainers } from './hooks/useContainers';
 import { useSettingsStore } from './store';
 
-// Background particle component
+// ─── Background particles ────────────────────────────────────────────────────
 
 function Particles() {
   const particles = useMemo(() => {
@@ -61,13 +61,12 @@ function AmbientBubbles() {
       ['rgba(168,85,247,0.45)', 'rgba(168,85,247,0.10)'],
     ];
 
-    // Added (_, index) here
     return Array.from({ length: 10 }).map((_, index) => {
       const depth = Math.pow(Math.random(), 1.7);
       const [a, b] = palette[Math.floor(Math.random() * palette.length)];
 
       return {
-        id: `bubble-${index}`, // Replaced crypto.randomUUID() with a simple string + index
+        id: `bubble-${index}`,
         size: 240 + Math.random() * 320,
         left: `${Math.random() * 100}%`,
         top: `${Math.random() * 100}%`,
@@ -100,36 +99,45 @@ function AmbientBubbles() {
     </div>
   );
 }
+
+// ─── App layout ──────────────────────────────────────────────────────────────
+
 function AppLayout() {
   const { autoRefresh, refreshInterval } = useSettingsStore();
   const { refresh: refreshHealth } = useHealth();
   const { load: loadApps } = useApps();
   const { load: loadContainers } = useContainers();
 
-useEffect(() => {
-  loadApps();
-  loadContainers();
-  refreshHealth();
-}, []);
-
-useEffect(() => {
-  if (!autoRefresh) return;
-
-  const id = setInterval(() => {
+  useEffect(() => {
     loadApps();
     loadContainers();
     refreshHealth();
-  }, refreshInterval * 1000);
+  }, []);
 
-  return () => clearInterval(id);
-}, [autoRefresh, refreshInterval]);
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const id = setInterval(() => {
+      loadApps();
+      loadContainers();
+      refreshHealth();
+    }, refreshInterval * 1000);
+    return () => clearInterval(id);
+  }, [autoRefresh, refreshInterval]);
 
   return (
     <div className="flex h-screen bg-[var(--bg-primary)] grid-bg bg-radial-cyan overflow-hidden">
-      <AmbientBubbles />
+      {/* <AmbientBubbles /> */}
       <Particles />
+
+      {/* Sidebar handles its own mobile/desktop rendering */}
       <Sidebar />
-      <main className="flex-1 flex flex-col overflow-hidden relative z-[1]">
+
+      {/*
+        Main column:
+        - flex-1 so it takes remaining width next to sidebar on desktop
+        - min-w-0 prevents flex children from overflowing
+      */}
+      <main className="flex-1 min-w-0 flex flex-col overflow-hidden relative z-[1]">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/apps" element={<Apps />} />
@@ -144,10 +152,11 @@ useEffect(() => {
   );
 }
 
+// ─── Root ────────────────────────────────────────────────────────────────────
+
 export default function App() {
   const { theme } = useThemeStore();
 
-  // Apply theme class to root
   useEffect(() => {
     const root = document.documentElement;
     if (theme === 'light') {

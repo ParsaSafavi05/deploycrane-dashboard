@@ -36,7 +36,7 @@ function SettingRow({ label, description, children }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-6">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-6">
       <div className="flex-1">
         <p className="text-sm font-medium text-[var(--text-primary)]">{label}</p>
         {description && <p className="text-xs text-[var(--text-muted)] mt-0.5">{description}</p>}
@@ -161,7 +161,7 @@ export default function SettingsPage() {
           {/* API Endpoints Reference */}
           <div className="mt-4 p-4 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)]">
             <p className="text-xs font-semibold text-[var(--text-secondary)] mb-3 uppercase tracking-wider">API Endpoints</p>
-            <div className="space-y-1.5 font-mono text-[10px]">
+            <div className="space-y-1.5 font-mono text-[10px] overflow-x-auto">
               {[
                 { method: 'GET', path: '/health', desc: 'Health status' },
                 { method: 'GET', path: '/apps', desc: 'List all apps' },
@@ -215,7 +215,7 @@ export default function SettingsPage() {
             >
               <div className="flex items-center gap-1.5">
                 <Clock size={13} className="text-[var(--text-muted)]" />
-                <div className="flex gap-1">
+                <div className="flex gap-1 flex-wrap">
                   {REFRESH_OPTIONS.map(s => (
                     <button
                       key={s}

@@ -64,15 +64,15 @@ export default function AppCard({ app, onSelect }: AppCardProps) {
       className={`rounded-2xl border bg-[var(--bg-card)] overflow-hidden card-hover transition-all
         ${isActive || hasOp ? 'border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.08)]' : 'border-[var(--border-color)]'}`}
     >
-      {/* Top strip - active indicator */}
       {(isActive || hasOp) && (
         <div className="h-0.5 bg-gradient-to-r from-cyan-500 via-sky-400 to-cyan-500 progress-shimmer" />
       )}
 
-      {/* Header */}
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3 min-w-0">
+      <div className="p-4 sm:p-5">
+        {/* Header: stacks on mobile, row on lg */}
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+          {/* Left: icon + name + repo */}
+          <div className="flex items-start gap-3 min-w-0 flex-1">
             <div className={`mt-0.5 p-2.5 rounded-xl flex-shrink-0 ${
               app.status === 'running' ? 'bg-emerald-500/15 border border-emerald-500/25' :
               app.status === 'failed' ? 'bg-red-500/15 border border-red-500/25' :
@@ -84,25 +84,23 @@ export default function AppCard({ app, onSelect }: AppCardProps) {
                 'text-cyan-400'
               } />
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-2">
                 <Link
                   to={`/apps/${app.id}`}
-                  className="font-semibold text-[var(--text-primary)] truncate max-w-[200px] cursor-pointer hover:text-cyan-400 transition-colors"
-                  title={app.name}
+                  className="font-semibold text-[var(--text-primary)] break-words cursor-pointer hover:text-cyan-400 transition-colors"
                 >
                   {app.name}
                 </Link>
-                <StatusBadge status={app.status} />
+                <StatusBadge status={app.status} className="flex-shrink-0 ml-auto" />
               </div>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-2 mt-1 min-w-0">
                 <GitBranch size={11} className="text-[var(--text-muted)] flex-shrink-0" />
                 <a
                   href={app.repo_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-[var(--text-muted)] hover:text-cyan-400 truncate max-w-[220px] transition-colors"
-                  title={app.repo_url}
+                  className="text-xs text-[var(--text-muted)] hover:text-cyan-400 break-all transition-colors"
                 >
                   {app.repo_url.replace(/^https?:\/\//, '')}
                 </a>
@@ -111,8 +109,8 @@ export default function AppCard({ app, onSelect }: AppCardProps) {
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
+          {/* Right: action buttons — wrap on mobile, row on desktop */}
+          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
             {canDeploy && (
               <Button
                 variant="primary"
@@ -121,12 +119,19 @@ export default function AppCard({ app, onSelect }: AppCardProps) {
                 loading={hasOp && op?.type === 'deploy'}
                 onClick={() => deploy(app.id)}
                 title="Full deploy (clone → build → start)"
+                className="flex-1 sm:flex-none justify-center"
               >
                 Deploy
               </Button>
             )}
             {canStop && (
-              <Button variant="danger" size="sm" icon={<Square size={12} />} onClick={() => stop(app.id)}>
+              <Button
+                variant="danger"
+                size="sm"
+                icon={<Square size={12} />}
+                onClick={() => stop(app.id)}
+                className="flex-1 sm:flex-none justify-center"
+              >
                 Stop
               </Button>
             )}
@@ -137,6 +142,7 @@ export default function AppCard({ app, onSelect }: AppCardProps) {
                 icon={<Play size={12} />}
                 loading={hasOp && op?.type === 'start'}
                 onClick={() => start(app.id)}
+                className="flex-1 sm:flex-none justify-center"
               >
                 Start
               </Button>
@@ -153,7 +159,7 @@ export default function AppCard({ app, onSelect }: AppCardProps) {
         </div>
 
         {/* Meta info */}
-        <div className="flex items-center gap-4 mt-3 text-xs text-[var(--text-muted)]">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-xs text-[var(--text-muted)]">
           {app.host_port > 0 && (
             <div className="flex items-center gap-1.5">
               <Server size={11} />
@@ -175,14 +181,14 @@ export default function AppCard({ app, onSelect }: AppCardProps) {
         </div>
 
         {/* Pipeline progress */}
-        <div className="mt-4">
-          <div className="flex items-center gap-0">
+        <div className="mt-4 overflow-x-auto scrollbar-none">
+          <div className="flex items-center gap-0 min-w-[280px]">
             {PIPELINE_STEPS.map((step, i) => {
               const active = progress === i;
               const complete = progress > i;
               return (
                 <div key={step.status} className="flex items-center flex-1 last:flex-none">
-                  <div className={`flex flex-col items-center`}>
+                  <div className="flex flex-col items-center">
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all
                       ${complete ? 'bg-cyan-500 border-cyan-400 text-white' :
                         active ? 'bg-cyan-500/20 border-cyan-400 text-cyan-400 animate-pulse' :
@@ -217,7 +223,7 @@ export default function AppCard({ app, onSelect }: AppCardProps) {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="border-t border-[var(--border-color)] p-5 space-y-4">
+            <div className="border-t border-[var(--border-color)] p-4 sm:p-5 space-y-4">
               {/* More actions */}
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -227,6 +233,7 @@ export default function AppCard({ app, onSelect }: AppCardProps) {
                   loading={hasOp && op?.type === 'clone'}
                   onClick={() => clone(app.id)}
                   disabled={!canClone}
+                  className="flex-1 sm:flex-none justify-center"
                 >
                   Clone
                 </Button>
@@ -237,46 +244,47 @@ export default function AppCard({ app, onSelect }: AppCardProps) {
                   loading={hasOp && op?.type === 'build'}
                   onClick={() => build(app.id)}
                   disabled={!canBuild}
+                  className="flex-1 sm:flex-none justify-center"
                 >
                   Build
                 </Button>
                 {app.container_id && (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-color)] text-xs text-[var(--text-muted)] font-mono">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-color)] text-xs text-[var(--text-muted)] font-mono w-full sm:w-auto">
                     <Terminal size={11} />
-                    <span>{app.container_id.slice(0, 12)}</span>
+                    <span className="break-all">{app.container_id.slice(0, 12)}</span>
                   </div>
                 )}
-                <div className="ml-auto">
+                <div className="w-full sm:w-auto sm:ml-auto">
                   {!confirmDelete ? (
                     <Button
                       variant="ghost"
                       size="sm"
                       icon={<Trash2 size={12} />}
-                      className="text-red-400 hover:text-red-300 hover:bg-red-950"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-950 w-full sm:w-auto justify-center"
                       onClick={() => setConfirmDelete(true)}
                     >
                       Delete
                     </Button>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-red-400">Confirm delete?</span>
-                      <Button variant="danger" size="sm" onClick={() => remove(app.id)}>Yes</Button>
-                      <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)}>No</Button>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-red-400">Confirm?</span>
+                      <Button variant="danger" size="sm" onClick={() => remove(app.id)} className="flex-1 sm:flex-none justify-center">Yes</Button>
+                      <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)} className="flex-1 sm:flex-none justify-center">No</Button>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Details */}
-              <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div className="space-y-1">
                   <p className="text-[var(--text-muted)]">App ID</p>
-                  <p className="font-mono text-[var(--text-secondary)] truncate" title={app.id}>{app.id}</p>
+                  <p className="font-mono text-[var(--text-secondary)] break-all">{app.id}</p>
                 </div>
                 {app.clone_path && (
                   <div className="space-y-1">
                     <p className="text-[var(--text-muted)]">Clone Path</p>
-                    <p className="font-mono text-[var(--text-secondary)] truncate" title={app.clone_path}>{app.clone_path}</p>
+                    <p className="font-mono text-[var(--text-secondary)] break-all">{app.clone_path}</p>
                   </div>
                 )}
               </div>

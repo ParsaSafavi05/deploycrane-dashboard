@@ -10,7 +10,13 @@ import type {
   SSELogLine,
 } from '../types';
 
-// ─── Theme Store ─────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/** True when the viewport is narrower than the md breakpoint (768 px). */
+const isMobile = () =>
+  typeof window !== 'undefined' && window.innerWidth < 768;
+
+// ─── Theme Store ──────────────────────────────────────────────────────────────
 interface ThemeState {
   theme: 'dark' | 'light';
   toggleTheme: () => void;
@@ -29,7 +35,7 @@ export const useThemeStore = create<ThemeState>()(
   )
 );
 
-// ─── Apps Store ──────────────────────────────────────────────────
+// ─── Apps Store ───────────────────────────────────────────────────────────────
 interface AppsState {
   apps: App[];
   loading: boolean;
@@ -66,7 +72,7 @@ export const useAppsStore = create<AppsState>()((set) => ({
     set((s) => ({ apps: s.apps.filter((a) => a.id !== id) })),
 }));
 
-// ─── Containers Store ────────────────────────────────────────────
+// ─── Containers Store ─────────────────────────────────────────────────────────
 interface ContainersState {
   containers: Container[];
   showAll: boolean;
@@ -89,7 +95,7 @@ export const useContainersStore = create<ContainersState>()((set) => ({
   setError: (error) => set({ error }),
 }));
 
-// ─── Health Store ────────────────────────────────────────────────
+// ─── Health Store ─────────────────────────────────────────────────────────────
 interface HealthState {
   health: HealthResponse | null;
   loading: boolean;
@@ -108,9 +114,9 @@ export const useHealthStore = create<HealthState>()((set) => ({
   setLastChecked: (lastChecked) => set({ lastChecked }),
 }));
 
-// ─── Operations Store ────────────────────────────────────────────
+// ─── Operations Store ─────────────────────────────────────────────────────────
 interface OperationsState {
-  operations: Record<string, ActiveOperation>; // keyed by appId
+  operations: Record<string, ActiveOperation>;
   addLog: (appId: string, log: SSELogLine) => void;
   startOperation: (appId: string, type: OperationType) => void;
   finishOperation: (appId: string, success: boolean) => void;
@@ -164,7 +170,7 @@ export const useOperationsStore = create<OperationsState>()((set) => ({
   clearAll: () => set({ operations: {} }),
 }));
 
-// ─── Notification Store ──────────────────────────────────────────
+// ─── Notification Store ───────────────────────────────────────────────────────
 interface NotificationState {
   notifications: Notification[];
   push: (n: Omit<Notification, 'id'>) => void;
@@ -186,24 +192,27 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
     })),
 }));
 
-// ─── UI Store ────────────────────────────────────────────────────
+// ─── UI Store ─────────────────────────────────────────────────────────────────
 interface UIState {
   sidebarOpen: boolean;
   activeModal: string | null;
   setSidebarOpen: (v: boolean) => void;
+  toggleSidebar: () => void;
   openModal: (name: string) => void;
   closeModal: () => void;
 }
 
 export const useUIStore = create<UIState>()((set) => ({
-  sidebarOpen: true,
+  // Open by default on desktop, closed by default on mobile
+  sidebarOpen: !isMobile(),
   activeModal: null,
   setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
+  toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   openModal: (activeModal) => set({ activeModal }),
   closeModal: () => set({ activeModal: null }),
 }));
 
-// ─── Settings Store ──────────────────────────────────────────────
+// ─── Settings Store ───────────────────────────────────────────────────────────
 interface SettingsState {
   apiBaseUrl: string;
   autoRefresh: boolean;
@@ -213,10 +222,12 @@ interface SettingsState {
   setRefreshInterval: (s: number) => void;
 }
 
+import { getCurrentBaseUrl } from '../config/api';
+
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      apiBaseUrl: localStorage.getItem('deploycrane_api_base_url') || 'http://localhost:8080',
+      apiBaseUrl: getCurrentBaseUrl(), // ← reads localStorage then falls back to dynamic default
       autoRefresh: true,
       refreshInterval: 10,
       setApiBaseUrl: (apiBaseUrl) => set({ apiBaseUrl }),

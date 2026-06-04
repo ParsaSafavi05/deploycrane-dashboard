@@ -46,11 +46,10 @@ export default function Apps() {
         subtitle={`${apps.length} app${apps.length !== 1 ? 's' : ''} · ${filtered.length} shown`}
       />
 
-      <div className="p-6 space-y-6 max-w-5xl mx-auto">
+      <div className="p-4 sm:p-6 space-y-6 max-w-6xl mx-auto">
         {/* Toolbar */}
-        <div className="flex items-center gap-3 flex-wrap animate-slide-up">
-          {/* Search */}
-          <div className="relative flex-1 min-w-[200px]">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_auto_auto] gap-3 animate-slide-up">
+          <div className="relative w-full">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               value={search}
@@ -60,13 +59,12 @@ export default function Apps() {
             />
           </div>
 
-          {/* Sort */}
-          <div className="flex items-center gap-1.5 px-1 py-1 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl">
-            <SlidersHorizontal size={12} className="text-[var(--text-muted)] ml-2" />
+          <div className="flex items-center gap-1.5 px-2 py-1 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl w-full lg:w-auto">
+            <SlidersHorizontal size={12} className="text-[var(--text-muted)] ml-1" />
             <select
               value={sort}
               onChange={e => setSort(e.target.value as typeof sort)}
-              className="bg-transparent text-sm text-[var(--text-secondary)] pr-2 py-1 focus:outline-none cursor-pointer"
+              className="bg-transparent text-sm text-[var(--text-secondary)] pr-2 py-1 focus:outline-none cursor-pointer w-full"
             >
               <option value="newest">Newest</option>
               <option value="oldest">Oldest</option>
@@ -80,28 +78,31 @@ export default function Apps() {
             icon={<RefreshCw size={13} className={loading ? 'animate-spin' : ''} />}
             onClick={load}
             loading={loading}
+            className="w-full lg:w-auto justify-center"
           >
             Refresh
           </Button>
+
           <Button
             variant="primary"
             size="sm"
             icon={<Plus size={14} />}
             onClick={() => setShowCreate(true)}
+            className="w-full lg:w-auto justify-center"
           >
             New App
           </Button>
         </div>
 
         {/* Status filter tabs */}
-        <div className="flex items-center gap-1.5 flex-wrap animate-fade-in">
+        <div className="flex flex-wrap gap-2 animate-fade-in">
           {STATUS_FILTERS.map(f => {
             const count = f.value === 'all' ? apps.length : apps.filter(a => a.status === f.value).length;
             return (
               <button
                 key={f.value}
                 onClick={() => setStatusFilter(f.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 whitespace-nowrap
                   ${statusFilter === f.value
                     ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-card)] border border-transparent'

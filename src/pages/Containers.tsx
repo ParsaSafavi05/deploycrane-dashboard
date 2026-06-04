@@ -67,8 +67,8 @@ export default function Containers() {
 
       <div className="p-6 space-y-6 max-w-5xl mx-auto">
         {/* Toolbar */}
-        <div className="flex items-center gap-3 flex-wrap animate-slide-up">
-          <div className="relative flex-1 min-w-[200px]">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 animate-slide-up">
+          <div className="relative w-full sm:flex-1">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               value={search}
@@ -149,7 +149,7 @@ export default function Containers() {
                       {isRunning && <div className="h-0.5 bg-gradient-to-r from-emerald-500 to-cyan-500" />}
 
                       <div className="p-4">
-                        <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className={`p-2 rounded-xl flex-shrink-0 ${isRunning ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-slate-800 border border-slate-700'}`}>
                               <Container size={16} className={isRunning ? 'text-emerald-400' : 'text-slate-500'} />
@@ -206,7 +206,7 @@ export default function Containers() {
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.2 }}
                           >
-                            <div className="border-t border-[var(--border-color)] p-4 grid grid-cols-2 gap-4 text-xs">
+                            <div className="border-t border-[var(--border-color)] p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                               <div>
                                 <p className="text-[var(--text-muted)] mb-1">Container ID</p>
                                 <button

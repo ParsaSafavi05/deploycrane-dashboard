@@ -36,7 +36,7 @@ export default function Health() {
             <div className={`absolute inset-0 opacity-5 ${isHealthy ? 'bg-emerald-400' : 'bg-red-400'}`} />
           )}
 
-          <div className="relative flex items-center justify-between">
+          <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <motion.div
                 animate={isHealthy ? { scale: [1, 1.1, 1] } : {}}
@@ -82,6 +82,7 @@ export default function Health() {
               </div>
             </div>
 
+            <div className="self-start sm:self-auto">
             <Button
               variant="secondary"
               icon={<RefreshCw size={14} className={loading ? 'animate-spin' : ''} />}
@@ -90,6 +91,7 @@ export default function Health() {
             >
               Refresh
             </Button>
+            </div>
           </div>
         </motion.div>
 
@@ -112,7 +114,7 @@ export default function Health() {
                     : 'border-red-800/40'
                 }`}
               >
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className={`p-2.5 rounded-xl border ${
                       check.status === 'healthy'
