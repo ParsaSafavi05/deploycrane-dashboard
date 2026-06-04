@@ -12,7 +12,9 @@ import Notifications from './components/ui/Notifications';
 import { useThemeStore } from './store';
 import { useHealth } from './hooks/useHealth';
 import AppDetails from './pages/AppDetails';
-
+import { useApps } from './hooks/useApps';
+import { useContainers } from './hooks/useContainers';
+import { useSettingsStore } from './store';
 
 // Background particle component
 
@@ -59,12 +61,13 @@ function AmbientBubbles() {
       ['rgba(168,85,247,0.45)', 'rgba(168,85,247,0.10)'],
     ];
 
-    return Array.from({ length: 10 }).map(() => {
+    // Added (_, index) here
+    return Array.from({ length: 10 }).map((_, index) => {
       const depth = Math.pow(Math.random(), 1.7);
       const [a, b] = palette[Math.floor(Math.random() * palette.length)];
 
       return {
-        id: crypto.randomUUID(),
+        id: `bubble-${index}`, // Replaced crypto.randomUUID() with a simple string + index
         size: 240 + Math.random() * 320,
         left: `${Math.random() * 100}%`,
         top: `${Math.random() * 100}%`,
@@ -98,8 +101,28 @@ function AmbientBubbles() {
   );
 }
 function AppLayout() {
-  // Initialize health polling
-  useHealth();
+  const { autoRefresh, refreshInterval } = useSettingsStore();
+  const { refresh: refreshHealth } = useHealth();
+  const { load: loadApps } = useApps();
+  const { load: loadContainers } = useContainers();
+
+useEffect(() => {
+  loadApps();
+  loadContainers();
+  refreshHealth();
+}, []);
+
+useEffect(() => {
+  if (!autoRefresh) return;
+
+  const id = setInterval(() => {
+    loadApps();
+    loadContainers();
+    refreshHealth();
+  }, refreshInterval * 1000);
+
+  return () => clearInterval(id);
+}, [autoRefresh, refreshInterval]);
 
   return (
     <div className="flex h-screen bg-[var(--bg-primary)] grid-bg bg-radial-cyan overflow-hidden">

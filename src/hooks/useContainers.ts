@@ -1,12 +1,11 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import * as api from '../services/api';
-import { useContainersStore, useNotificationStore, useSettingsStore } from '../store';
+import { useContainersStore, useNotificationStore } from '../store';
 
 export function useContainers() {
   const { containers, loading, error, showAll, setContainers, setLoading, setError, setShowAll } =
     useContainersStore();
   const { push: notify } = useNotificationStore();
-  const { autoRefresh, refreshInterval } = useSettingsStore();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -21,13 +20,6 @@ export function useContainers() {
       setLoading(false);
     }
   }, [showAll, setContainers, setError, setLoading]);
-
-  useEffect(() => {
-    load();
-    if (!autoRefresh) return;
-    const id = setInterval(load, refreshInterval * 1000);
-    return () => clearInterval(id);
-  }, [load, autoRefresh, refreshInterval]);
 
   const stopContainer = useCallback(
     async (id: string) => {

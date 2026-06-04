@@ -6,8 +6,6 @@ import {
 import { Link } from 'react-router-dom';
 import Header from '../components/layout/Header';
 import { useAppsStore, useContainersStore, useHealthStore, useOperationsStore } from '../store';
-import { useHealth } from '../hooks/useHealth';
-import { useContainers } from '../hooks/useContainers';
 import StatusBadge from '../components/ui/StatusBadge';
 import { formatDistanceToNow } from 'date-fns';
 import type { AppStatus } from '../types';
@@ -56,8 +54,6 @@ export default function Dashboard() {
   const { containers } = useContainersStore();
   const { health } = useHealthStore();
   const { operations } = useOperationsStore();
-  useHealth();
-  useContainers();
 
   const runningApps = apps.filter(a => a.status === 'running').length;
   const runningContainers = containers.filter(c => c.State === 'running').length;

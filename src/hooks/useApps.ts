@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import * as api from '../services/api';
 import { useAppsStore, useOperationsStore, useNotificationStore, useSettingsStore } from '../store';
 import { saveBaseUrl } from '../config/api';
@@ -9,7 +9,6 @@ export function useApps() {
     useAppsStore();
   const { startOperation, addLog, finishOperation } = useOperationsStore();
   const { push: notify } = useNotificationStore();
-  const { autoRefresh, refreshInterval } = useSettingsStore();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -25,13 +24,6 @@ export function useApps() {
     }
   }, [setApps, setError, setLoading]);
 
-  // Auto-refresh
-  useEffect(() => {
-    load();
-    if (!autoRefresh) return;
-    const id = setInterval(load, refreshInterval * 1000);
-    return () => clearInterval(id);
-  }, [load, autoRefresh, refreshInterval]);
 
   function runStreamOp(
     appId: string,

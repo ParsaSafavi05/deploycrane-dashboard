@@ -26,6 +26,24 @@ function getClient(): AxiosInstance {
   }
   return _client;
 }
+const APPS_CACHE_TTL_MS = 500;
+
+let appsInFlight: Promise<App[]> | null = null;
+let appsCache: { data: App[]; expiresAt: number } | null = null;
+
+export function invalidateAppsCache(): void {
+  appsInFlight = null;
+  appsCache = null;
+}
+
+function withAppsCacheInvalidation(onDone: SSEDoneCallback): SSEDoneCallback {
+  return (success: boolean) => {
+    if (success) {
+      invalidateAppsCache();
+    }
+    onDone(success);
+  };
+}
 
 // ─── Health ──────────────────────────────────────────────────────
 export async function fetchHealth(): Promise<HealthResponse> {
@@ -37,10 +55,25 @@ export async function fetchHealth(): Promise<HealthResponse> {
 }
 
 // ─── Apps ────────────────────────────────────────────────────────
-export async function listApps(): Promise<App[]> {
+export async function listApps(force = false): Promise<App[]> {
+  const now = Date.now();
+  if (!force && appsCache && appsCache.expiresAt > now) {
+    return appsCache.data;
+  }
+  if (appsInFlight) {
+    return appsInFlight;
+  }
   const cfg = getApiConfig();
-  const res: AxiosResponse<App[]> = await getClient().get(cfg.endpoints.apps);
-  return res.data;
+  appsInFlight = getClient()
+    .get(cfg.endpoints.apps)
+    .then((res: AxiosResponse<App[]>) => {
+      appsCache = { data: res.data, expiresAt: Date.now() + APPS_CACHE_TTL_MS };
+      return res.data;
+    })
+    .finally(() => {
+      appsInFlight = null;
+    });
+  return appsInFlight;
 }
 
 export async function getApp(id: string): Promise<App> {
@@ -50,18 +83,22 @@ export async function getApp(id: string): Promise<App> {
 }
 
 export async function stopApp(id: string): Promise<App> {
+  invalidateAppsCache();
   const cfg = getApiConfig();
   const res: AxiosResponse<App> = await getClient().post(
     cfg.endpoints.stopApp(id)
   );
+  invalidateAppsCache();
   return res.data;
 }
 
 export async function deleteApp(id: string): Promise<{ message: string }> {
+  invalidateAppsCache();
   const cfg = getApiConfig();
   const res: AxiosResponse<{ message: string }> = await getClient().delete(
     cfg.endpoints.deleteApp(id)
   );
+  invalidateAppsCache();
   return res.data;
 }
 
@@ -177,11 +214,12 @@ export function createApp(
   signal?: AbortSignal
 ): void {
   const cfg = getApiConfig();
+  invalidateAppsCache();
   streamPost(
     cfg.endpoints.createApp,
     input as unknown as Record<string, unknown>,
     onLog,
-    onDone,
+    withAppsCacheInvalidation(onDone),
     signal
   );
 }
@@ -193,8 +231,9 @@ export function cloneApp(
   onDone: SSEDoneCallback,
   signal?: AbortSignal
 ): void {
+  invalidateAppsCache();
   const cfg = getApiConfig();
-  streamPost(cfg.endpoints.cloneApp(id), {}, onLog, onDone, signal);
+  streamPost(cfg.endpoints.cloneApp(id), {}, onLog, withAppsCacheInvalidation(onDone), signal);
 }
 
 // ─── Build App (SSE) ─────────────────────────────────────────────
@@ -204,8 +243,9 @@ export function buildApp(
   onDone: SSEDoneCallback,
   signal?: AbortSignal
 ): void {
+  invalidateAppsCache();
   const cfg = getApiConfig();
-  streamPost(cfg.endpoints.buildApp(id), {}, onLog, onDone, signal);
+  streamPost(cfg.endpoints.buildApp(id), {}, onLog, withAppsCacheInvalidation(onDone), signal);
 }
 
 // ─── Start App (SSE) ─────────────────────────────────────────────
@@ -215,8 +255,9 @@ export function startApp(
   onDone: SSEDoneCallback,
   signal?: AbortSignal
 ): void {
+  invalidateAppsCache();
   const cfg = getApiConfig();
-  streamPost(cfg.endpoints.startApp(id), {}, onLog, onDone, signal);
+  streamPost(cfg.endpoints.startApp(id), {}, onLog, withAppsCacheInvalidation(onDone), signal);
 }
 
 // ─── Deploy App (SSE) ────────────────────────────────────────────
@@ -226,8 +267,9 @@ export function deployApp(
   onDone: SSEDoneCallback,
   signal?: AbortSignal
 ): void {
+  invalidateAppsCache();
   const cfg = getApiConfig();
-  streamPost(cfg.endpoints.deployApp(id), {}, onLog, onDone, signal);
+  streamPost(cfg.endpoints.deployApp(id), {}, onLog, withAppsCacheInvalidation(onDone), signal);
 }
 
 // ─── Containers ──────────────────────────────────────────────────
