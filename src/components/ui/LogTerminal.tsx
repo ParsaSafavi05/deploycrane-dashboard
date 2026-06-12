@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+"use client";
+
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { Copy, Check, Terminal, Wifi, WifiOff } from 'lucide-react';
 import type { SSELogLine } from '../../types';
@@ -10,6 +12,8 @@ interface LogTerminalProps {
   height?: string;
   autoScroll?: boolean;
 }
+
+const BOTTOM_THRESHOLD_PX = 32;
 
 function classForEvent(event: string): string {
   switch (event) {
@@ -39,40 +43,74 @@ export default function LogTerminal({
   logs,
   status = 'idle',
   title = 'Logs',
-  height = 'h-80',
+  height = 'full',
   autoScroll = true,
 }: LogTerminalProps) {
-  const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
-  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [followLogs, setFollowLogs] = useState(autoScroll);
 
   useEffect(() => {
-    if (autoScroll && isAtBottom && bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [logs, autoScroll, isAtBottom]);
+    setFollowLogs(autoScroll);
+  }, [autoScroll]);
 
-  const handleScroll = () => {
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
     const el = containerRef.current;
     if (!el) return;
-    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
-    setIsAtBottom(atBottom);
-  };
 
-  const handleCopy = () => {
-    const text = logs.map(l => `[${format(new Date(l.timestamp), 'HH:mm:ss')}] [${l.event}] ${l.data}`).join('\n');
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior,
     });
-  };
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!followLogs) return;
+    scrollToBottom('auto');
+  }, [logs, followLogs, scrollToBottom]);
+
+  const handleScroll = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    setFollowLogs(distanceFromBottom <= BOTTOM_THRESHOLD_PX);
+  }, []);
+
+  const handleCopy = useCallback(async () => {
+    const text = logs
+      .map((l) => `[${format(new Date(l.timestamp), 'HH:mm:ss')}] [${l.event}] ${l.data}`)
+      .join('\n');
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  }, [logs]);
+
+  const outerHeightClass = height === 'full' ? 'h-[600px] max-h-[80vh]' : height;
 
   return (
-    <div className="relative flex flex-col rounded-xl border border-[var(--border-color)] overflow-hidden h-[600px] max-h-[80vh]">      {/* Terminal header */}
+    <div className={`relative flex flex-col rounded-xl border border-[var(--border-color)] overflow-hidden ${outerHeightClass}`}>
+      {/* Terminal header */}
       <div className="flex items-center justify-between px-4 py-2 bg-[var(--bg-secondary)] border-b border-[var(--border-color)]">
         <div className="flex items-center gap-2">
-          {/* macOS-style dots */}
           <div className="flex gap-1.5">
             <span className="w-3 h-3 rounded-full bg-red-500/70" />
             <span className="w-3 h-3 rounded-full bg-amber-500/70" />
@@ -83,8 +121,8 @@ export default function LogTerminal({
             <span className="text-xs font-mono text-[var(--text-secondary)]">{title}</span>
           </div>
         </div>
+
         <div className="flex items-center gap-3">
-          {/* Status indicator */}
           <div className="flex items-center gap-1.5">
             {status === 'running' ? (
               <>
@@ -108,7 +146,7 @@ export default function LogTerminal({
               </>
             )}
           </div>
-          {/* Copy button */}
+
           <button
             onClick={handleCopy}
             className="flex items-center gap-1 px-2 py-1 rounded text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-card)] transition-colors text-xs"
@@ -123,7 +161,8 @@ export default function LogTerminal({
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className={`log-terminal flex-1 overflow-y-auto p-4 ${height !== 'full' ? height : 'flex-1'}`} >
+        className="log-terminal flex-1 min-h-0 overflow-y-auto p-4"
+      >
         {logs.length === 0 ? (
           <div className="flex items-center justify-center h-full text-[var(--text-muted)] text-xs font-mono">
             <span>Waiting for output</span>
@@ -139,24 +178,26 @@ export default function LogTerminal({
               <span className="log-timestamp text-[10px] select-none">
                 {format(new Date(line.timestamp), 'HH:mm:ss.SSS')}
               </span>
-              <span className={`text-[10px] font-mono uppercase tracking-widest opacity-60 ${classForEvent(line.event)} select-none min-w-[60px]`}>
+              <span
+                className={`text-[10px] font-mono uppercase tracking-widest opacity-60 ${classForEvent(line.event)} select-none min-w-[60px]`}
+              >
                 [{line.event}]
               </span>
               <span className={`text-xs font-mono ${classForEvent(line.event)} break-all whitespace-pre-wrap`}>
-                {prefixForEvent(line.event)}{line.data}
+                {prefixForEvent(line.event)}
+                {line.data}
               </span>
             </div>
           ))
         )}
-        <div ref={bottomRef} />
       </div>
 
       {/* Jump to bottom button */}
-      {!isAtBottom && logs.length > 0 && (
+      {!followLogs && logs.length > 0 && (
         <button
           onClick={() => {
-            setIsAtBottom(true);
-            bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+            setFollowLogs(true);
+            requestAnimationFrame(() => scrollToBottom('smooth'));
           }}
           className="absolute bottom-4 right-4 px-3 py-1.5 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 text-xs hover:bg-cyan-500/30 transition-colors"
         >
